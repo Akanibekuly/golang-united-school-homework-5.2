@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -19,63 +20,63 @@ func TestCache(t *testing.T) {
 		expKeys []string
 		waitFor time.Duration
 	}{
-		"empty": {
-			kvPairs: []kvPair{},
-			expKeys: []string{},
-		},
-		"one value": {
-			kvPairs: []kvPair{{
-				key:      "key1",
-				value:    "value1",
-				expValue: "value1",
-			}},
-			expKeys: []string{"key1"},
-		},
-		"several values": {
-			kvPairs: []kvPair{
-				{
-					key:      "key1",
-					value:    "value1",
-					expValue: "value1",
-				},
-				{
-					key:      "key2",
-					value:    "value2",
-					expValue: "value2",
-				},
-				{
-					key:      "key3",
-					value:    "value3",
-					expValue: "value3",
-				},
-			},
-			expKeys: []string{"key1", "key2", "key3"},
-		},
-		"overwrite a value": {
-			kvPairs: []kvPair{
-				{
-					key:      "key1",
-					value:    "value1",
-					expValue: "anotherValue1",
-				},
-				{
-					key:      "key2",
-					value:    "value2",
-					expValue: "value2",
-				},
-				{
-					key:      "key3",
-					value:    "value3",
-					expValue: "value3",
-				},
-				{
-					key:      "key1",
-					value:    "anotherValue1",
-					expValue: "anotherValue1",
-				},
-			},
-			expKeys: []string{"key1", "key2", "key3"},
-		},
+		// "empty": {
+		// 	kvPairs: []kvPair{},
+		// 	expKeys: []string{},
+		// },
+		// "one value": {
+		// 	kvPairs: []kvPair{{
+		// 		key:      "key1",
+		// 		value:    "value1",
+		// 		expValue: "value1",
+		// 	}},
+		// 	expKeys: []string{"key1"},
+		// },
+		// "several values": {
+		// 	kvPairs: []kvPair{
+		// 		{
+		// 			key:      "key1",
+		// 			value:    "value1",
+		// 			expValue: "value1",
+		// 		},
+		// 		{
+		// 			key:      "key2",
+		// 			value:    "value2",
+		// 			expValue: "value2",
+		// 		},
+		// 		{
+		// 			key:      "key3",
+		// 			value:    "value3",
+		// 			expValue: "value3",
+		// 		},
+		// 	},
+		// 	expKeys: []string{"key1", "key2", "key3"},
+		// },
+		// "overwrite a value": {
+		// 	kvPairs: []kvPair{
+		// 		{
+		// 			key:      "key1",
+		// 			value:    "value1",
+		// 			expValue: "anotherValue1",
+		// 		},
+		// 		{
+		// 			key:      "key2",
+		// 			value:    "value2",
+		// 			expValue: "value2",
+		// 		},
+		// 		{
+		// 			key:      "key3",
+		// 			value:    "value3",
+		// 			expValue: "value3",
+		// 		},
+		// 		{
+		// 			key:      "key1",
+		// 			value:    "anotherValue1",
+		// 			expValue: "anotherValue1",
+		// 		},
+		// 	},
+		// 	expKeys: []string{"key1", "key2", "key3"},
+		// },
 		"expired values": {
 			kvPairs: []kvPair{
 				{
@@ -129,6 +130,7 @@ func TestCache(t *testing.T) {
 					}
 				} else {
 					if ok {
+						fmt.Println(v, p.key)
 						t.Errorf("Get: and expired value is present in the cache(returned ok==true), while it should't")
 					}
 
@@ -151,6 +153,7 @@ func TestCache(t *testing.T) {
 			if len(tt.expKeys) != len(keys) {
 				t.Errorf("Keys: number of returned keys is incorrect: exp: %d, got %d", len(tt.expKeys), len(keys))
 			}
+
 			for _, expKey := range tt.expKeys {
 				exists := false
 				for _, key := range keys {

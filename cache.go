@@ -1,11 +1,12 @@
 package cache
 
-import "time"
+import (
+	"time"
+)
 
 type ValueSt struct {
-	value       string
-	deadline    time.Time
-	hasDeadline bool
+	value    string
+	deadline time.Time
 }
 
 type Cache struct {
@@ -13,7 +14,9 @@ type Cache struct {
 }
 
 func NewCache() Cache {
-	return Cache{}
+	return Cache{
+		store: make(map[string]ValueSt),
+	}
 }
 
 func (c *Cache) Get(key string) (string, bool) {
@@ -22,8 +25,9 @@ func (c *Cache) Get(key string) (string, bool) {
 		return "", false
 	}
 
-	if val.hasDeadline {
-		if time.Since(val.deadline) < 0 {
+	if !val.deadline.IsZero() {
+		if time.Since(val.deadline) >= 0 {
+			delete(c.store, key)
 			return "", false
 		}
 	}
@@ -32,17 +36,17 @@ func (c *Cache) Get(key string) (string, bool) {
 }
 
 func (c *Cache) Put(key, value string) {
-	c.store[key] = ValueSt{value: value}
+	c.store[key] = ValueSt{
+		value: value,
+	}
 }
 
 func (c *Cache) Keys() []string {
 	arr := make([]string, 0, len(c.store))
 	for k := range c.store {
-		val, ok := c.Get(k)
+		_, ok := c.Get(k)
 		if ok {
-			arr = append(arr, val)
-		} else {
-			delete(c.store, k)
+			arr = append(arr, k)
 		}
 	}
 
@@ -51,8 +55,7 @@ func (c *Cache) Keys() []string {
 
 func (c *Cache) PutTill(key, value string, deadline time.Time) {
 	c.store[key] = ValueSt{
-		value:       value,
-		deadline:    deadline,
-		hasDeadline: true,
+		value:    value,
+		deadline: deadline,
 	}
 }
